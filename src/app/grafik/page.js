@@ -27,19 +27,6 @@ export default function GrafikPage() {
 
   return (
     <LayoutWrapper>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-4 md:mb-6"
-      >
-        <h1 className="text-xl md:text-2xl font-bold text-gray-800">
-          Grafik Cashflow 📊
-        </h1>
-        <p className="text-sm md:text-base text-gray-500">
-          Visualisasi pemasukan dan pengeluaran
-        </p>
-      </motion.div>
-
       <div className="mb-4 md:mb-6">
         <FilterBulanTahun
           bulan={bulan}

@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
 
   // Environment variables yang akan tersedia saat build
   env: {
@@ -12,32 +11,30 @@ const nextConfig = {
   // Konfigurasi untuk deployment di Vercel
   output: "standalone",
 
-  // Ignore type errors saat build (opsional)
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-
-  // Ignore ESLint errors saat build (opsional)
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
   // Optimasi gambar
   images: {
     unoptimized: true,
   },
 
-  // Webpack konfigurasi (opsional)
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      };
-    }
-    return config;
+  // Konfigurasi Turbopack (menggantikan webpack)
+  turbopack: {
+    // Atur root project jika perlu
+    // root: path.join(__dirname, '.'),
+
+    // Resolve aliases jika diperlukan
+    resolveAlias: {
+      // Contoh: jika butuh alias
+      // '@': './src',
+    },
+
+    // Rules untuk loader kustom (jika diperlukan)
+    rules: {
+      // Contoh untuk SVG
+      // '*.svg': {
+      //   loaders: ['@svgr/webpack'],
+      //   as: '*.js',
+      // },
+    },
   },
 };
 
