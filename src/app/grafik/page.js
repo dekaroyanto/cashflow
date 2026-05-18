@@ -2,9 +2,24 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import LayoutWrapper from "../../components/LayoutWrapper";
-import GrafikCashflow from "../../components/GrafikCashflow";
 import FilterBulanTahun from "../../components/FilterBulanTahun";
+
+// Import komponen Grafik secara dinamis tanpa SSR
+const GrafikCashflow = dynamic(
+  () => import("../../components/GrafikCashflow"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6">
+        <div className="flex justify-center items-center h-64 md:h-96">
+          <div className="text-gray-500">Memuat grafik...</div>
+        </div>
+      </div>
+    ),
+  },
+);
 
 export default function GrafikPage() {
   const [bulan, setBulan] = useState(new Date().getMonth() + 1);

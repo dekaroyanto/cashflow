@@ -14,23 +14,28 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-);
+// Register ChartJS components hanya di client
+if (typeof window !== "undefined") {
+  ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+  );
+}
 
 export default function GrafikCashflow({ bulan, tahun }) {
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const chartRef = useRef(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -42,8 +47,10 @@ export default function GrafikCashflow({ bulan, tahun }) {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [bulan, tahun]);
+    if (isClient) {
+      fetchData();
+    }
+  }, [bulan, tahun, isClient]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -271,11 +278,12 @@ export default function GrafikCashflow({ bulan, tahun }) {
     },
   };
 
-  if (loading) {
+  // Loading state sebelum client siap
+  if (!isClient || (loading && !chartData)) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6">
         <div className="flex justify-center items-center h-64 md:h-96">
-          <div className="text-gray-500">Loading grafik...</div>
+          <div className="text-gray-500">Memuat grafik...</div>
         </div>
       </div>
     );
@@ -335,34 +343,36 @@ export default function GrafikCashflow({ bulan, tahun }) {
       )}
 
       {/* Informasi Ringkasan */}
-      <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="text-center md:text-left">
-          <div className="text-xs text-gray-500">Total Pemasukan</div>
-          <div className="text-sm md:text-base font-semibold text-green-600">
-            {formatRupiah(
-              chartData?.datasets[0]?.data.reduce((a, b) => a + b, 0) || 0,
-            )}
+      {chartData && (
+        <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="text-center md:text-left">
+            <div className="text-xs text-gray-500">Total Pemasukan</div>
+            <div className="text-sm md:text-base font-semibold text-green-600">
+              {formatRupiah(
+                chartData?.datasets[0]?.data.reduce((a, b) => a + b, 0) || 0,
+              )}
+            </div>
+          </div>
+          <div className="text-center md:text-left">
+            <div className="text-xs text-gray-500">Total Pengeluaran</div>
+            <div className="text-sm md:text-base font-semibold text-red-600">
+              {formatRupiah(
+                chartData?.datasets[1]?.data.reduce((a, b) => a + b, 0) || 0,
+              )}
+            </div>
+          </div>
+          <div className="text-center md:text-left">
+            <div className="text-xs text-gray-500">Saldo Akhir</div>
+            <div className="text-sm md:text-base font-semibold text-blue-600">
+              {formatRupiah(
+                chartData?.datasets[2]?.data[
+                  chartData.datasets[2].data.length - 1
+                ] || 0,
+              )}
+            </div>
           </div>
         </div>
-        <div className="text-center md:text-left">
-          <div className="text-xs text-gray-500">Total Pengeluaran</div>
-          <div className="text-sm md:text-base font-semibold text-red-600">
-            {formatRupiah(
-              chartData?.datasets[1]?.data.reduce((a, b) => a + b, 0) || 0,
-            )}
-          </div>
-        </div>
-        <div className="text-center md:text-left">
-          <div className="text-xs text-gray-500">Saldo Akhir</div>
-          <div className="text-sm md:text-base font-semibold text-blue-600">
-            {formatRupiah(
-              chartData?.datasets[2]?.data[
-                chartData.datasets[2].data.length - 1
-              ] || 0,
-            )}
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Petunjuk Interaksi */}
       {isMobile && (
