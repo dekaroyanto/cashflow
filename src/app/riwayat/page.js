@@ -2,11 +2,29 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import LayoutWrapper from "../../components/LayoutWrapper";
-import RiwayatTransaksi from "../../components/RiwayatTransaksi";
-import EditTransaksiModal from "../../components/EditTransaksiModal";
 import { supabase } from "../../lib/supabase";
 import { Filter } from "lucide-react";
+
+const RiwayatTransaksi = dynamic(
+  () => import("../../components/RiwayatTransaksi"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-gray-500">Memuat riwayat...</div>
+        </div>
+      </div>
+    ),
+  },
+);
+
+const EditTransaksiModal = dynamic(
+  () => import("../../components/EditTransaksiModal"),
+  { ssr: false },
+);
 
 export default function RiwayatPage() {
   const [refresh, setRefresh] = useState(0);
@@ -38,6 +56,17 @@ export default function RiwayatPage() {
 
   return (
     <LayoutWrapper>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-6"
+      >
+        <h1 className="text-2xl font-bold text-gray-800">
+          Riwayat Transaksi 📜
+        </h1>
+        <p className="text-gray-500">Lihat, edit, atau hapus transaksi</p>
+      </motion.div>
+
       {/* Filter Sumber Dana */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
