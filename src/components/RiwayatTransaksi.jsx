@@ -7,9 +7,8 @@ import {
   Pencil,
   Trash2,
   RefreshCw,
-  Filter,
-  ChevronDown,
   ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import {
   showConfirm,
@@ -23,13 +22,15 @@ export default function RiwayatTransaksi({
   refreshTrigger,
   onEdit,
   selectedSumberDana = "all",
+  bulan,
+  tahun,
 }) {
   const [transaksi, setTransaksi] = useState([]);
   const [filteredTransaksi, setFilteredTransaksi] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sumberDanaMap, setSumberDanaMap] = useState({});
-  const [sortBy, setSortBy] = useState("tanggal"); // tanggal, nominal, keterangan
-  const [sortOrder, setSortOrder] = useState("desc"); // asc, desc
+  const [sortBy, setSortBy] = useState("tanggal");
+  const [sortOrder, setSortOrder] = useState("desc");
 
   useEffect(() => {
     fetchData();
@@ -37,7 +38,7 @@ export default function RiwayatTransaksi({
 
   useEffect(() => {
     filterAndSortTransaksi();
-  }, [transaksi, selectedSumberDana, sortBy, sortOrder]);
+  }, [transaksi, selectedSumberDana, bulan, tahun, sortBy, sortOrder]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -76,6 +77,16 @@ export default function RiwayatTransaksi({
 
   const filterAndSortTransaksi = () => {
     let result = [...transaksi];
+
+    // Filter berdasarkan bulan dan tahun
+    if (bulan && tahun) {
+      result = result.filter((t) => {
+        const tanggal = new Date(t.tanggal);
+        return (
+          tanggal.getMonth() + 1 === bulan && tanggal.getFullYear() === tahun
+        );
+      });
+    }
 
     // Filter berdasarkan sumber dana
     if (selectedSumberDana !== "all") {
@@ -170,6 +181,24 @@ export default function RiwayatTransaksi({
     );
   };
 
+  const getMonthName = (month) => {
+    const months = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+    return months[month - 1];
+  };
+
   if (loading)
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -183,24 +212,27 @@ export default function RiwayatTransaksi({
     <div className="bg-white rounded-xl shadow-sm border border-gray-100">
       <div className="p-6 border-b border-gray-100">
         <div className="flex justify-between items-center flex-wrap gap-3">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Riwayat Transaksi
-            {selectedSumberDana !== "all" && (
-              <span className="ml-2 text-sm font-normal text-blue-600">
-                (Filtered: {sumberDanaMap[selectedSumberDana]})
-              </span>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800">
+              Riwayat Transaksi
+            </h2>
+            {(selectedSumberDana !== "all" || (bulan && tahun)) && (
+              <p className="text-sm text-gray-500 mt-1">
+                Menampilkan transaksi
+                {selectedSumberDana !== "all" &&
+                  ` dari ${sumberDanaMap[selectedSumberDana]}`}
+                {bulan && tahun && ` bulan ${getMonthName(bulan)} ${tahun}`}
+              </p>
             )}
-          </h2>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={fetchData}>
-              <RefreshCw className="h-4 w-4 mr-1" />
-              Refresh
-            </Button>
           </div>
+          <Button variant="outline" size="sm" onClick={fetchData}>
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Refresh
+          </Button>
         </div>
 
         {/* Sorting Controls */}
-        <div className="flex gap-4 mt-4 text-xs">
+        <div className="flex flex-wrap gap-4 mt-4 text-xs">
           <button
             onClick={() => handleSort("tanggal")}
             className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors"
@@ -226,16 +258,16 @@ export default function RiwayatTransaksi({
         {filteredTransaksi.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-2">📭</div>
-            <p className="text-gray-500">Belum ada transaksi</p>
-            {selectedSumberDana !== "all" && (
+            <p className="text-gray-500">Tidak ada transaksi</p>
+            {(selectedSumberDana !== "all" || (bulan && tahun)) && (
               <p className="text-sm text-gray-400 mt-1">
-                Tidak ada transaksi untuk {sumberDanaMap[selectedSumberDana]}
+                Tidak ada transaksi untuk periode ini
               </p>
             )}
           </div>
         ) : (
-          <div className="space-y-3 max-h-[600px] overflow-y-auto">
-            {filteredTransaksi.map((item, index) => (
+          <div className="space-y-3 max-h-[500px] overflow-y-auto">
+            {filteredTransaksi.map((item) => (
               <div
                 key={`${item.type}-${item.id}`}
                 className="border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all hover:border-gray-200"

@@ -2,8 +2,22 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import LayoutWrapper from "../../components/LayoutWrapper";
-import PengeluaranForm from "../../components/PengeluaranForm";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+
+const PengeluaranForm = dynamic(
+  () => import("../../components/PengeluaranForm"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <p className="text-center text-gray-500">Memuat form...</p>
+      </div>
+    ),
+  },
+);
 
 export default function PengeluaranPage() {
   const [refresh, setRefresh] = useState(0);
@@ -17,19 +31,32 @@ export default function PengeluaranPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
+        className="flex items-center gap-3 mb-6"
       >
-        <h1 className="text-2xl font-bold text-gray-800">
-          Catat Pengeluaran 📉
-        </h1>
-        <p className="text-gray-500">
-          Tambahkan pengeluaran dari sumber dana Anda
-        </p>
+        <Link
+          href="/"
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5 text-gray-600" />
+        </Link>
+        <div>
+          <h1 className="text-xl font-bold text-gray-800">
+            Catat Pengeluaran 📉
+          </h1>
+          <p className="text-sm text-gray-500">
+            Tambahkan pengeluaran dari sumber dana
+          </p>
+        </div>
       </motion.div>
 
-      <div className="max-w-2xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="max-w-2xl mx-auto"
+      >
         <PengeluaranForm onSuccess={handleSuccess} />
-      </div>
+      </motion.div>
     </LayoutWrapper>
   );
 }

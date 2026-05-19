@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar, FileText, DollarSign, CreditCard } from "lucide-react";
-import Modal from "./Modal";
 import {
   showSuccess,
   showError,
@@ -14,7 +14,8 @@ import {
   closeLoading,
 } from "../lib/alert";
 
-export default function PengeluaranForm({ onSuccess, isOpen, onClose }) {
+export default function PengeluaranForm({ onSuccess }) {
+  const router = useRouter();
   const [sumberDanaList, setSumberDanaList] = useState([]);
   const [formData, setFormData] = useState({
     tanggal: "",
@@ -25,10 +26,8 @@ export default function PengeluaranForm({ onSuccess, isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      fetchSumberDana();
-    }
-  }, [isOpen]);
+    fetchSumberDana();
+  }, []);
 
   const fetchSumberDana = async () => {
     const { data } = await supabase.from("sumberdana").select("id, nama_bank");
@@ -78,105 +77,106 @@ export default function PengeluaranForm({ onSuccess, isOpen, onClose }) {
         sumberdana_id: "",
       });
       if (onSuccess) onSuccess();
-      onClose();
+      setTimeout(() => {
+        router.push("/");
+      }, 1500);
     }
     setLoading(false);
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Tambah Pengeluaran">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label className="text-gray-700 text-sm mb-1 block">Tanggal</Label>
-          <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              type="date"
-              className="pl-10 border-gray-200 focus:border-red-400 focus:ring-red-400"
-              value={formData.tanggal}
-              onChange={(e) =>
-                setFormData({ ...formData, tanggal: e.target.value })
-              }
-            />
-          </div>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-5 bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+    >
+      <div>
+        <Label className="text-gray-700 text-sm mb-1 block">Tanggal</Label>
+        <div className="relative">
+          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            type="date"
+            className="pl-10 border-gray-200 focus:border-red-400 focus:ring-red-400"
+            value={formData.tanggal}
+            onChange={(e) =>
+              setFormData({ ...formData, tanggal: e.target.value })
+            }
+          />
         </div>
+      </div>
 
-        <div>
-          <Label className="text-gray-700 text-sm mb-1 block">Keterangan</Label>
-          <div className="relative">
-            <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Bayar cicilan, belanja, dll"
-              className="pl-10 border-gray-200 focus:border-red-400 focus:ring-red-400"
-              value={formData.keterangan}
-              onChange={(e) =>
-                setFormData({ ...formData, keterangan: e.target.value })
-              }
-              required
-            />
-          </div>
+      <div>
+        <Label className="text-gray-700 text-sm mb-1 block">Keterangan</Label>
+        <div className="relative">
+          <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Bayar cicilan, belanja, dll"
+            className="pl-10 border-gray-200 focus:border-red-400 focus:ring-red-400"
+            value={formData.keterangan}
+            onChange={(e) =>
+              setFormData({ ...formData, keterangan: e.target.value })
+            }
+            required
+          />
         </div>
+      </div>
 
-        <div>
-          <Label className="text-gray-700 text-sm mb-1 block">Nominal</Label>
-          <div className="relative">
-            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              type="number"
-              placeholder="500000"
-              className="pl-10 border-gray-200 focus:border-red-400 focus:ring-red-400"
-              value={formData.nominal}
-              onChange={(e) =>
-                setFormData({ ...formData, nominal: e.target.value })
-              }
-              required
-            />
-          </div>
+      <div>
+        <Label className="text-gray-700 text-sm mb-1 block">Nominal</Label>
+        <div className="relative">
+          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            type="number"
+            placeholder="500000"
+            className="pl-10 border-gray-200 focus:border-red-400 focus:ring-red-400"
+            value={formData.nominal}
+            onChange={(e) =>
+              setFormData({ ...formData, nominal: e.target.value })
+            }
+            required
+          />
         </div>
+      </div>
 
-        <div>
-          <Label className="text-gray-700 text-sm mb-1 block">
-            Sumber Dana
-          </Label>
-          <div className="relative">
-            <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <select
-              className="w-full border border-gray-200 rounded-md p-2 pl-10 focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 bg-white"
-              value={formData.sumberdana_id}
-              onChange={(e) =>
-                setFormData({ ...formData, sumberdana_id: e.target.value })
-              }
-              required
-            >
-              <option value="">Pilih sumber dana</option>
-              {sumberDanaList.map((sd) => (
-                <option key={sd.id} value={sd.id}>
-                  {sd.nama_bank}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="flex gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            className="flex-1"
+      <div>
+        <Label className="text-gray-700 text-sm mb-1 block">Sumber Dana</Label>
+        <div className="relative">
+          <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <select
+            className="w-full border border-gray-200 rounded-md p-2 pl-10 focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 bg-white"
+            value={formData.sumberdana_id}
+            onChange={(e) =>
+              setFormData({ ...formData, sumberdana_id: e.target.value })
+            }
+            required
           >
-            Batal
-          </Button>
-          <Button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-          >
-            {loading ? "Menyimpan..." : "Simpan Pengeluaran"}
-          </Button>
+            <option value="">Pilih sumber dana</option>
+            {sumberDanaList.map((sd) => (
+              <option key={sd.id} value={sd.id}>
+                {sd.nama_bank}
+              </option>
+            ))}
+          </select>
         </div>
-      </form>
-    </Modal>
+      </div>
+
+      <div className="flex gap-3 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => router.back()}
+          className="flex-1"
+        >
+          Batal
+        </Button>
+        <Button
+          type="submit"
+          disabled={loading}
+          className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+        >
+          {loading ? "Menyimpan..." : "Simpan Pengeluaran"}
+        </Button>
+      </div>
+    </form>
   );
 }

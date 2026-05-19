@@ -14,7 +14,6 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
-// Register ChartJS components hanya di client
 if (typeof window !== "undefined") {
   ChartJS.register(
     CategoryScale,
@@ -192,9 +191,6 @@ export default function GrafikCashflow({ bulan, tahun }) {
           size: isMobile ? 11 : 12,
         },
       },
-      datalabels: {
-        display: false,
-      },
     },
     scales: {
       y: {
@@ -219,13 +215,6 @@ export default function GrafikCashflow({ bulan, tahun }) {
           color: "rgba(0, 0, 0, 0.05)",
           drawTicks: isMobile ? false : true,
         },
-        title: {
-          display: !isMobile,
-          text: "Nominal",
-          font: {
-            size: 11,
-          },
-        },
       },
       x: {
         ticks: {
@@ -241,13 +230,6 @@ export default function GrafikCashflow({ bulan, tahun }) {
         grid: {
           display: false,
           drawTicks: false,
-        },
-        title: {
-          display: !isMobile,
-          text: "Tanggal",
-          font: {
-            size: 11,
-          },
         },
       },
     },
@@ -278,7 +260,6 @@ export default function GrafikCashflow({ bulan, tahun }) {
     },
   };
 
-  // Loading state sebelum client siap
   if (!isClient || (loading && !chartData)) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6">
@@ -303,7 +284,6 @@ export default function GrafikCashflow({ bulan, tahun }) {
         </div>
       </div>
 
-      {/* Chart Container dengan Responsive Height */}
       <div
         className="relative w-full"
         style={{ height: isMobile ? "300px" : "400px" }}
@@ -311,7 +291,6 @@ export default function GrafikCashflow({ bulan, tahun }) {
         <Line ref={chartRef} data={chartData} options={options} />
       </div>
 
-      {/* Legend Custom untuk Mobile */}
       {isMobile && (
         <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-3 gap-2 text-center">
           <div className="flex flex-col items-center">
@@ -321,7 +300,6 @@ export default function GrafikCashflow({ bulan, tahun }) {
                 Pemasukan
               </span>
             </div>
-            <div className="text-xs text-gray-500">+</div>
           </div>
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-1 mb-1">
@@ -330,19 +308,16 @@ export default function GrafikCashflow({ bulan, tahun }) {
                 Pengeluaran
               </span>
             </div>
-            <div className="text-xs text-gray-500">-</div>
           </div>
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-1 mb-1">
               <div className="w-3 h-3 border-2 border-blue-500 border-dashed"></div>
               <span className="text-xs font-medium text-gray-600">Saldo</span>
             </div>
-            <div className="text-xs text-gray-500">=</div>
           </div>
         </div>
       )}
 
-      {/* Informasi Ringkasan */}
       {chartData && (
         <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="text-center md:text-left">
@@ -374,7 +349,6 @@ export default function GrafikCashflow({ bulan, tahun }) {
         </div>
       )}
 
-      {/* Petunjuk Interaksi */}
       {isMobile && (
         <div className="mt-3 text-center text-xs text-gray-400">
           💡 Sentuh grafik untuk melihat detail
