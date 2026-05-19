@@ -34,10 +34,17 @@ export default function RiwayatPage() {
   const [selectedSumberDana, setSelectedSumberDana] = useState("all");
   const [bulan, setBulan] = useState(new Date().getMonth() + 1);
   const [tahun, setTahun] = useState(new Date().getFullYear());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchSumberDana();
   }, []);
+
+  // Reset ke halaman 1 saat filter berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedSumberDana, bulan, tahun, refresh]);
 
   const fetchSumberDana = async () => {
     const { data } = await supabase
@@ -61,6 +68,7 @@ export default function RiwayatPage() {
     setSelectedSumberDana("all");
     setBulan(new Date().getMonth() + 1);
     setTahun(new Date().getFullYear());
+    setCurrentPage(1);
   };
 
   const hasActiveFilters =
@@ -150,6 +158,10 @@ export default function RiwayatPage() {
           selectedSumberDana={selectedSumberDana}
           bulan={bulan}
           tahun={tahun}
+          currentPage={currentPage}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onItemsPerPageChange={setItemsPerPage}
         />
 
         {editingTransaksi && (

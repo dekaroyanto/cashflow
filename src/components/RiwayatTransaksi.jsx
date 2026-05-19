@@ -9,6 +9,8 @@ import {
   RefreshCw,
   ChevronUp,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   showConfirm,
@@ -24,13 +26,19 @@ export default function RiwayatTransaksi({
   selectedSumberDana = "all",
   bulan,
   tahun,
+  currentPage = 1,
+  itemsPerPage = 10,
+  onPageChange,
+  onItemsPerPageChange,
 }) {
   const [transaksi, setTransaksi] = useState([]);
   const [filteredTransaksi, setFilteredTransaksi] = useState([]);
+  const [paginatedTransaksi, setPaginatedTransaksi] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sumberDanaMap, setSumberDanaMap] = useState({});
   const [sortBy, setSortBy] = useState("tanggal");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetchData();
@@ -39,6 +47,22 @@ export default function RiwayatTransaksi({
   useEffect(() => {
     filterAndSortTransaksi();
   }, [transaksi, selectedSumberDana, bulan, tahun, sortBy, sortOrder]);
+
+  useEffect(() => {
+    // Update pagination ketika filteredTransaksi berubah
+    const total = Math.ceil(filteredTransaksi.length / itemsPerPage);
+    setTotalPages(total);
+
+    // Reset ke halaman 1 jika currentPage melebihi totalPages
+    if (currentPage > total && total > 0) {
+      onPageChange?.(1);
+    }
+
+    // Ambil data untuk halaman saat ini
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    setPaginatedTransaksi(filteredTransaksi.slice(start, end));
+  }, [filteredTransaksi, currentPage, itemsPerPage]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -157,6 +181,7 @@ export default function RiwayatTransaksi({
       setSortBy(field);
       setSortOrder("desc");
     }
+    onPageChange?.(1); // Reset ke halaman 1 saat sorting berubah
   };
 
   const formatRupiah = (nominal) => {
@@ -197,6 +222,35 @@ export default function RiwayatTransaksi({
       "Desember",
     ];
     return months[month - 1];
+  };
+
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      onPageChange?.(page);
+    }
+  };
+
+  const handleItemsPerPageChange = (e) => {
+    const newValue = parseInt(e.target.value);
+    onItemsPerPageChange?.(newValue);
+    onPageChange?.(1); // Reset ke halaman 1
+  };
+
+  // Generate nomor halaman yang ditampilkan
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let end = Math.min(totalPages, start + maxVisible - 1);
+
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
   };
 
   if (loading)
@@ -255,7 +309,7 @@ export default function RiwayatTransaksi({
       </div>
 
       <div className="p-6">
-        {filteredTransaksi.length === 0 ? (
+        {paginatedTransaksi.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-2">📭</div>
             <p className="text-gray-500">Tidak ada transaksi</p>
@@ -266,101 +320,174 @@ export default function RiwayatTransaksi({
             )}
           </div>
         ) : (
-          <div className="space-y-3 max-h-[500px] overflow-y-auto">
-            {filteredTransaksi.map((item) => (
-              <div
-                key={`${item.type}-${item.id}`}
-                className="border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all hover:border-gray-200"
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="font-semibold text-gray-800">
-                      {item.keterangan}
+          <>
+            <div className="space-y-3">
+              {paginatedTransaksi.map((item) => (
+                <div
+                  key={`${item.type}-${item.id}`}
+                  className="border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all hover:border-gray-200"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-800">
+                        {item.keterangan}
+                      </div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        {formatDate(item.tanggal)}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 mt-1">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                          {sumberDanaMap[item.sumberdana_id]}
+                        </span>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full ${
+                            item.type === "pemasukan"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {item.type === "pemasukan"
+                            ? "Pemasukan"
+                            : "Pengeluaran"}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">
-                      {formatDate(item.tanggal)}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                        {sumberDanaMap[item.sumberdana_id]}
-                      </span>
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
+                    <div className="text-right">
+                      <div
+                        className={`font-bold text-lg ${
                           item.type === "pemasukan"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
+                            ? "text-green-600"
+                            : "text-red-600"
                         }`}
                       >
-                        {item.type === "pemasukan"
-                          ? "Pemasukan"
-                          : "Pengeluaran"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div
-                      className={`font-bold text-lg ${
-                        item.type === "pemasukan"
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {item.type === "pemasukan" ? "+" : "-"}{" "}
-                      {formatRupiah(item.nominal)}
-                    </div>
-                    <div className="flex gap-2 mt-2 justify-end">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEdit(item)}
-                        className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-full"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(item.id, item.type)}
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                        {item.type === "pemasukan" ? "+" : "-"}{" "}
+                        {formatRupiah(item.nominal)}
+                      </div>
+                      <div className="flex gap-2 mt-2 justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEdit(item)}
+                          className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-full"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(item.id, item.type)}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {filteredTransaksi.length > 0 && (
+              <div className="mt-6 pt-4 border-t border-gray-100">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                  {/* Items per page selector */}
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-gray-500">Tampilkan</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={handleItemsPerPageChange}
+                      className="border border-gray-200 rounded-lg p-1.5 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 bg-white"
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                    <span className="text-gray-500">data</span>
+                  </div>
+
+                  {/* Page info */}
+                  <div className="text-sm text-gray-500">
+                    Menampilkan {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                    {Math.min(
+                      currentPage * itemsPerPage,
+                      filteredTransaksi.length,
+                    )}{" "}
+                    dari {filteredTransaksi.length} transaksi
+                  </div>
+
+                  {/* Pagination buttons */}
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => goToPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+
+                    {getPageNumbers().map((page) => (
+                      <Button
+                        key={page}
+                        variant={currentPage === page ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => goToPage(page)}
+                        className={`h-8 w-8 p-0 ${currentPage === page ? "bg-blue-600 text-white" : ""}`}
+                      >
+                        {page}
+                      </Button>
+                    ))}
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => goToPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
 
         {/* Summary */}
         {filteredTransaksi.length > 0 && (
           <div className="mt-4 pt-4 border-t border-gray-100">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Total Transaksi:</span>
-              <span className="font-semibold text-gray-700">
-                {filteredTransaksi.length}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm mt-1">
-              <span className="text-gray-500">Total Pemasukan:</span>
-              <span className="font-semibold text-green-600">
-                {formatRupiah(
-                  filteredTransaksi
-                    .filter((t) => t.type === "pemasukan")
-                    .reduce((sum, t) => sum + t.nominal, 0),
-                )}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm mt-1">
-              <span className="text-gray-500">Total Pengeluaran:</span>
-              <span className="font-semibold text-red-600">
-                {formatRupiah(
-                  filteredTransaksi
-                    .filter((t) => t.type === "pengeluaran")
-                    .reduce((sum, t) => sum + t.nominal, 0),
-                )}
-              </span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <p className="text-xs text-gray-500">Total Transaksi</p>
+                <p className="text-sm font-semibold text-gray-700">
+                  {filteredTransaksi.length}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Total Pemasukan</p>
+                <p className="text-sm font-semibold text-green-600">
+                  {formatRupiah(
+                    filteredTransaksi
+                      .filter((t) => t.type === "pemasukan")
+                      .reduce((sum, t) => sum + t.nominal, 0),
+                  )}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Total Pengeluaran</p>
+                <p className="text-sm font-semibold text-red-600">
+                  {formatRupiah(
+                    filteredTransaksi
+                      .filter((t) => t.type === "pengeluaran")
+                      .reduce((sum, t) => sum + t.nominal, 0),
+                  )}
+                </p>
+              </div>
             </div>
           </div>
         )}
