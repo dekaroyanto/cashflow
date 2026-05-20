@@ -103,7 +103,7 @@ export default function Navbar() {
               </div>
 
               <div className="text-right">
-                <p className="text-[10px] text-gray-400">Waktu Jakarta</p>
+                <p className="text-[10px] text-gray-400">Waktu</p>
                 <p className="text-xs md:text-sm font-semibold text-gray-700">
                   {currentTime}
                 </p>
