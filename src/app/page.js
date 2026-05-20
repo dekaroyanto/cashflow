@@ -52,8 +52,10 @@ export default function DashboardPage() {
           className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6"
         >
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Halo, Deka! 👋</h1>
-            <p className="text-gray-500">Pantau keuanganmu dengan mudah</p>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Halo, Sayangkuww! 👋
+            </h1>
+            <p className="text-gray-500">Jangan lupa ya buat catat keuangan!</p>
           </div>
 
           {/* Tombol Aksi Desktop */}
