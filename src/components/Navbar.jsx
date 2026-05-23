@@ -72,7 +72,7 @@ export default function Navbar() {
               </div>
               <div>
                 <h1 className="text-base md:text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  CashFlow Pro
+                  CashFlow
                 </h1>
                 <p className="text-[10px] md:text-xs text-gray-500">
                   Deka & Amelia
