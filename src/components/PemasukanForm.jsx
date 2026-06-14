@@ -88,7 +88,7 @@ export default function PemasukanForm({ onSuccess }) {
       });
       if (onSuccess) onSuccess();
       setTimeout(() => {
-        router.push("/");
+        router.push("/pemasukan");
       }, 1500);
     }
     setLoading(false);

@@ -78,7 +78,7 @@ export default function PengeluaranForm({ onSuccess }) {
       });
       if (onSuccess) onSuccess();
       setTimeout(() => {
-        router.push("/");
+        router.push("/pengeluaran");
       }, 1500);
     }
     setLoading(false);
