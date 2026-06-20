@@ -1,7 +1,9 @@
+// app/layout.js
 import "./globals.css";
+import PinProtection from "@/components/PinProtection"; // Import komponen
 
 export const metadata = {
-  title: "CashFlow Pro - Kelola Keuangan",
+  title: "CashFlow Deka & Amelia",
   description: "Aplikasi cashflow untuk Deka & Amelia",
   manifest: "/manifest.json",
   themeColor: "#3B82F6",
@@ -25,7 +27,7 @@ export const metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "CashFlow Pro",
+    title: "CashFlow Deka & Amelia",
   },
   formatDetection: {
     telephone: false,
@@ -39,9 +41,14 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" href="/icons/icon-180x180.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="CashFlow Pro" />
+        <meta
+          name="apple-mobile-web-app-title"
+          content="CashFlow Deka & Amelia"
+        />
       </head>
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen">
+        <PinProtection> {children}</PinProtection>
+      </body>
     </html>
   );
 }
